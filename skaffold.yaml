@@ -1,0 +1,31 @@
+apiVersion: skaffold/v1alpha2
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.DOCKER_REGISTRY}}/peterzal-gmail-com/hackdays2018:{{.VERSION}}"
+  artifacts:
+  - imageName: changeme
+    workspace: .
+    docker: {}
+  local: {}
+deploy:
+  kubectl:
+    manifests:
+profiles:
+- name: dev
+  build:
+    tagPolicy:
+      envTemplate:
+        template: "{{.DOCKER_REGISTRY}}/peterzal-gmail-com/hackdays2018:{{.DIGEST_HEX}}"
+    artifacts:
+    - docker: {}
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: hackdays2018
+        chartPath: charts/hackdays2018
+        setValueTemplates:
+          image.repository: "{{.DOCKER_REGISTRY}}/peterzal-gmail-com/hackdays2018"
+          image.tag: "{{.TAG}}"
